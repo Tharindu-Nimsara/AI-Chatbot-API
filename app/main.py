@@ -1,8 +1,10 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.database import initialize_database
 from app.api.chat import router as chat_router
 from app.api.history import router as history_router
+from app.middleware.security_middleware import SecurityHeadersMiddleware
 import logging
 
 logging.basicConfig(
@@ -15,6 +17,15 @@ app = FastAPI(
     version=settings.app_version,
     debug=settings.debug,
     description="AI Chatbot API with memory and LLM integration"
+)
+
+# Add middleware — order matters, outermost runs first
+app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[settings.allowed_origins],
+    allow_methods=["GET", "POST", "DELETE"],
+    allow_headers=["*"]
 )
 
 # Initialize database on startup

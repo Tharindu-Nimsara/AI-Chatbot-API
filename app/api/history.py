@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Security
 from app.models.memory import (
     HistoryResponse,
     ConversationListResponse,
@@ -7,6 +7,7 @@ from app.models.memory import (
     ConversationStats
 )
 from app.services.memory_service import memory_service
+from app.core.security import verify_api_key
 import logging
 
 logger = logging.getLogger(__name__)
@@ -17,10 +18,15 @@ router = APIRouter(
 )
 
 
-@router.get("/history/{session_id}", response_model=HistoryResponse)
-async def get_history(session_id: str):
+@router.get(
+    "/history/{session_id}",
+    response_model=HistoryResponse
+)
+async def get_history(
+    session_id: str,
+    api_key: str = Security(verify_api_key)
+):
     """Get the full conversation history for a session."""
-
     messages = memory_service.get_history_for_display(session_id)
     stats = memory_service.get_stats(session_id)
 
@@ -37,10 +43,14 @@ async def get_history(session_id: str):
     )
 
 
-@router.get("/conversations", response_model=ConversationListResponse)
-async def list_conversations():
+@router.get(
+    "/conversations",
+    response_model=ConversationListResponse
+)
+async def list_conversations(
+    api_key: str = Security(verify_api_key)
+):
     """List all conversations."""
-
     conversations = memory_service.get_all_conversations()
 
     return ConversationListResponse(
@@ -49,10 +59,15 @@ async def list_conversations():
     )
 
 
-@router.delete("/history/{session_id}", response_model=ClearHistoryResponse)
-async def clear_history(session_id: str):
+@router.delete(
+    "/history/{session_id}",
+    response_model=ClearHistoryResponse
+)
+async def clear_history(
+    session_id: str,
+    api_key: str = Security(verify_api_key)
+):
     """Clear all memory for a specific session."""
-
     success = memory_service.clear_conversation(session_id)
 
     if not success:

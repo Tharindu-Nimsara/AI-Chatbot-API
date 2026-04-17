@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     # GitHub Models
     github_token: str = ""
     github_model_endpoint: str = "https://models.github.ai/inference"
-    github_model_name: str = "xai/grok-3-mini"
+    github_model_name: str = "microsoft/Phi-4"
 
     # Generation
     max_tokens: int = 1000
@@ -24,8 +24,15 @@ class Settings(BaseSettings):
 
     # Memory
     database_url: str = "data/chatbot.db"
-    max_history_messages: int = 5    # Max messages to send to LLM
-    max_history_tokens: int = 3000    # Token budget for history
+    max_history_messages: int = 10
+    max_history_tokens: int = 3000
+
+    # Security
+    api_secret_key: str = "change-this-in-production"
+    rate_limit_requests: int = 10     # Max requests per window
+    rate_limit_window: int = 60       # Window size in seconds
+    max_message_length: int = 2000    # Max chars per message
+    allowed_origins: str = "*"        # CORS origins
 
     class Config:
         env_file = ".env"
