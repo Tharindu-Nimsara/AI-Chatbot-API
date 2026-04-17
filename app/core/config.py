@@ -1,7 +1,10 @@
 from pydantic_settings import BaseSettings
+from pydantic import ConfigDict
 
 
 class Settings(BaseSettings):
+    model_config = ConfigDict(env_file=".env")
+
     app_name: str = "AI Chatbot API"
     app_version: str = "1.0.0"
     debug: bool = False
@@ -9,7 +12,7 @@ class Settings(BaseSettings):
     # GitHub Models
     github_token: str = ""
     github_model_endpoint: str = "https://models.github.ai/inference"
-    github_model_name: str = "microsoft/Phi-4"
+    github_model_name: str = "xai/grok-3-mini"
 
     # Generation
     max_tokens: int = 1000
@@ -29,13 +32,10 @@ class Settings(BaseSettings):
 
     # Security
     api_secret_key: str = "change-this-in-production"
-    rate_limit_requests: int = 10     # Max requests per window
-    rate_limit_window: int = 60       # Window size in seconds
-    max_message_length: int = 2000    # Max chars per message
-    allowed_origins: str = "*"        # CORS origins
-
-    class Config:
-        env_file = ".env"
+    rate_limit_requests: int = 10
+    rate_limit_window: int = 60
+    max_message_length: int = 2000
+    allowed_origins: str = "*"
 
 
 settings = Settings()

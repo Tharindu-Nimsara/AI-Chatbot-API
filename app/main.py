@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
@@ -12,14 +13,23 @@ logging.basicConfig(
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s"
 )
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    initialize_database()
+    yield
+    # Shutdown (add cleanup here later if needed)
+
+
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
     debug=settings.debug,
-    description="AI Chatbot API with memory and LLM integration"
+    description="AI Chatbot API with memory and LLM integration",
+    lifespan=lifespan
 )
 
-# Add middleware — order matters, outermost runs first
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(
     CORSMiddleware,
@@ -28,14 +38,9 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-# Initialize database on startup
-@app.on_event("startup")
-async def startup_event():
-    initialize_database()
-
-# Register routers
 app.include_router(chat_router)
 app.include_router(history_router)
+
 
 @app.get("/")
 async def root():
@@ -43,6 +48,7 @@ async def root():
         "message": "AI Chatbot API is running",
         "version": settings.app_version
     }
+
 
 @app.get("/health")
 async def health_check():
